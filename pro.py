@@ -1,3 +1,4 @@
+from crypt import methods
 from databasedata import password, username ,host, port
 
 from sqlalchemy import Boolean, column, create_engine, MetaData, Table, null
@@ -358,7 +359,7 @@ def insertcompany():
         })
 
 
-
+### check availability of item
 @app.route('/item/availability/<int:item_id>', methods=['GET'])
 def itemavailability(item_id):
     item= session.query(Item).filter_by(item_id = item_id).first()
@@ -376,6 +377,44 @@ def itemavailability(item_id):
 
 
 
+
+
+
+## delete customer according to id
+
+@app.route('/remove/customer/<int:customer_id>', methods=['GET','POST'])
+def removecustomer(customer_id):
+    
+    try:
+        result =session.query(Customer).filter_by(customer_id = customer_id).first()
+        if(result.customer_id == customer_id):
+            session.query(Customer).filter_by(customer_id = customer_id).delete()
+            session.commit()
+            return jsonify({
+                    'status': 'success',
+                    'message': 'customer deleted successfully',
+                    'customer_id': customer_id
+                })
+        else:
+            raise Exception('dataerror')
+    except:
+        return jsonify({
+                'status': 'failed',
+                'message': 'customer not found',
+                'customer_id': customer_id
+            })
+
+
+
+
+
+@app.route('/update/item/<int:item_id>',methods=['PUT'])
+def updateitem(item_id):
+    try:
+        pass
+
+    except:
+        pass
 
 if __name__ == '__main__':
     # create_table()
