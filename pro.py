@@ -496,8 +496,20 @@ def updatecompany(company_id):
         })
 
 
-
-
+## total item in the stock
+@app.route('/totalstock',methods=['GET'])
+def totalstock():
+    sql = 'SELECT * FROM items;'
+    with engine.connect() as conn:
+        query = conn.execute(sql)
+    result = query.fetchall()
+    total_stock = 0
+    for item in result:
+        total_stock += item.item_quantity
+    return jsonify({
+            'status': "success",
+            'totalstock': total_stock,
+        })
 
 
 
