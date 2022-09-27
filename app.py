@@ -77,7 +77,7 @@ def create_table():
 @app.route('/api/customers',methods=['GET'])
 def all_customers():
     customers = Table('Customer',metadata_obj,autoload=True,autoload_with=engine)
-    stmt = select([customer])
+    stmt = select([customers])
     results = connection.execute(stmt).fetchall()
     response_data = []
     
@@ -93,7 +93,7 @@ def all_customers():
         
         return jsonify({
             'status':200,
-            'data':response_data
+            'customer_data':response_data
         })
 
     except:
@@ -122,7 +122,7 @@ def all_items():
         
         return jsonify({
             'status':200,
-            'data':response_data
+            'items':response_data
         })
 
     except:
@@ -135,7 +135,7 @@ def all_items():
 #Retrive all company_data
 @app.route('/api/company',methods=['GET'])
 def all_company():
-    item = Table('Company',metadata_obj,autoload=True,autoload_with=engine)
+    company = Table('Company',metadata_obj,autoload=True,autoload_with=engine)
     stmt = select([company])
     results = connection.execute(stmt).fetchall()
     response_data = []
@@ -160,7 +160,35 @@ def all_company():
             'status':400,
             'message':'data not found'
         }) 
+
+#Retrive all inventory_data
+@app.route('/api/inventory',methods=['GET'])
+def all_inventory():
+    inventory = Table('Inventory',metadata_obj,autoload=True,autoload_with=engine)
+    stmt = select([inventory])
+    results = connection.execute(stmt).fetchall()
+    response_data = []
+    
+    try:
+        for result in results:
+            data_dict = dict()
+            data_dict['inventory_id'] = result.inventory_id
+            data_dict['inventory_name'] = result.inventory_name
+            data_dict['item_id'] = result.item_id
+            response_data.append(data_dict)
         
+        return jsonify({
+            'status':200,
+            'inventory_data':response_data
+        })
+
+    except:
+        return jsonify({
+            'status':400,
+            'message':'data not found'
+        }) 
+
+
 if __name__ == '__main__':
     create_table()
     app.run(debug=True)
