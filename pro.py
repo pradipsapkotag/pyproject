@@ -276,7 +276,7 @@ def insertcustomer():
         session.rollback()
         return jsonify({
             'status': "failed",
-            'message': "Duplicate input: program_code exists in database" if ie.orig.args[0] == 1062\
+            'message': "Duplicate input: sustomer exists in database" if ie.orig.args[0] == 1062\
                         else "Invalid input",
             'data': {}
         })
@@ -287,9 +287,9 @@ def insertcustomer():
 
 ## insert item and inventory
 @app.route('/insert/item', methods=['POST'])
-def insertcustomer():
+def insertitem():
     try:
-        params = request.get_json(silent= True,force =True)
+        params = request.get_json(force=True,silent=True)
         item_id = params["item_id"]
         item_name = params["item_name"]
         item_brand= params["item_brand"]
@@ -298,12 +298,19 @@ def insertcustomer():
         item_inventory = params["item_inventory"]
         item = Item(item_id = item_id,item_name=item_name,item_brand=item_brand,item_price=item_price,item_quantity=item_quantity)
         session.add(item)
-        inventory_id = 5
-        inventory_name = item_inventory
+    
+        sql = 'SELECT * FROM inventory;'
+        with engine.connect() as conn:
+            query = conn.execute(sql) 
+        inventory_id=query.fetchall()[-1].inventory_id+1
+        print(f'inventory_id:{inventory_id}')
+        item= session.query(Item).filter_by(item_id = item_id).first()
+        inventory = Inventory(inventory_id = inventory_id,inventory_name = item_inventory,item_id = item.item_id)
+        session.add(inventory)
         session.commit()
         return jsonify({
                 'status': 'success',
-                'message': 'Customer insertion successful',
+                'message': 'item insertion successful',
                 'data': {
                     'recods_inserted': params
                 }
@@ -312,7 +319,7 @@ def insertcustomer():
         session.rollback()
         return jsonify({
             'status': "failed",
-            'message': "Duplicate input: program_code exists in database" if ie.orig.args[0] == 1062\
+            'message': "Duplicate input: item exists in database" if ie.orig.args[0] == 1062\
                         else "Invalid input",
             'data': {}
         })
