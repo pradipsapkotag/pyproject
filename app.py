@@ -131,6 +131,36 @@ def all_items():
             'message':'data not found'
         })   
 
+
+#Retrive all company_data
+@app.route('/api/company',methods=['GET'])
+def all_company():
+    item = Table('Company',metadata_obj,autoload=True,autoload_with=engine)
+    stmt = select([company])
+    results = connection.execute(stmt).fetchall()
+    response_data = []
+    
+    try:
+        for result in results:
+            data_dict = dict()
+            data_dict['company_id'] = result.company_id
+            data_dict['company_name'] = result.company_name
+            data_dict['company_address'] = result.company_address
+            data_dict['company_phone'] = result.company_phone
+            data_dict['company_email'] = result.company_email
+            response_data.append(data_dict)
+        
+        return jsonify({
+            'status':200,
+            'company_data':response_data
+        })
+
+    except:
+        return jsonify({
+            'status':400,
+            'message':'data not found'
+        }) 
+        
 if __name__ == '__main__':
     create_table()
     app.run(debug=True)
