@@ -396,7 +396,7 @@ def removecustomer(customer_id):
                     'customer_id': customer_id
                 })
         else:
-            raise Exception('dataerror')
+            raise Exception('DataError')
     except:
         return jsonify({
                 'status': 'failed',
@@ -406,15 +406,101 @@ def removecustomer(customer_id):
 
 
 
+#### updae item
 
-
-@app.route('/update/item/<int:item_id>',methods=['PUT'])
+@app.route('/update/item/<int:item_id>',methods=['POST'])
 def updateitem(item_id):
     try:
-        pass
+        params = request.get_json(silent= True,force =True)
+        # return params
+        # try:
+        #     customer_id = params["customer_id"]
+        # except:
+        #     raise Exception('DataError')
+        # try:
+        #     customer_name = params["customer_name"]
+        # except:
+        #     raise Exception('DataError')
+        # try:
+        #     customer_address= params["customer_address"]
+        # except:
+        #     raise Exception('DataError')
+        # try:
+        #     customer_phone = params["customer_phone"]
+        # except:
+        #     raise Exception('DataError')
+        # try:
+        #     customer_email=params["customer_email"]
+        # except:
+        #     raise Exception('DataError')
+        update_query = session.query(Item).filter_by(item_id = item_id).update(params)
+        session.commit()
+        return jsonify({
+            'status': "success",
+            'message': "updated database",
+            'data': params
+        })
+        
 
     except:
-        pass
+        return jsonify({
+            'status': "failed",
+            'message': "Invalid Entry",
+            'data': {}
+        })
+
+
+
+## update customer
+@app.route('/update/customer/<int:customer_id>',methods=['POST'])
+def updatecustomer(customer_id):
+    try:
+        params = request.get_json(silent= True,force =True)
+        update_query = session.query(Customer).filter_by(customer_id = customer_id).update(params)
+        session.commit()
+        return jsonify({
+            'status': "success",
+            'message': "updated database",
+            'data': params
+        })
+        
+
+    except:
+        return jsonify({
+            'status': "failed",
+            'message': "Invalid Entry",
+            'data': {}
+        })
+
+
+
+## update company
+@app.route('/update/company/<int:company_id>',methods=['POST'])
+def updatecompany(company_id):
+    try:
+        params = request.get_json(silent= True,force =True)
+        update_query = session.query(Company).filter_by(company_id = company_id).update(params)
+        session.commit()
+        return jsonify({
+            'status': "success",
+            'message': "updated database",
+            'data': params
+        })
+        
+
+    except:
+        return jsonify({
+            'status': "failed",
+            'message': "Invalid Entry",
+            'data': {}
+        })
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     # create_table()
