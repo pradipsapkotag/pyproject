@@ -1,4 +1,5 @@
 from multiprocessing import connection
+from sqlite3 import IntegrityError
 from sqlalchemy.orm import sessionmaker,relationship
 from flask import Flask,jsonify,request
 from sqlalchemy import create_engine, Table,MetaData,insert,select
@@ -49,8 +50,8 @@ class customer(Base):
         return super().__repr__()
 
 #item
-class item(Base):
-    __tablename__ = 'Item'
+class items(Base):
+    __tablename__ = 'Items'
 
     item_id = Column(Integer(), primary_key = True)
     item_name = Column(String(60))
@@ -188,6 +189,104 @@ def all_inventory():
             'message':'data not found'
         }) 
 
+
+# ******POST METHODS********
+
+#Insert Customer Data
+@app.route('/api/insert_customer',methods=['POST'])
+def insert_customer():
+    body = request.get_json()
+    customer = Table('Customer',metadata_obj,autoload=True,autoload_with=engine)
+    stmt = insert(customer)
+
+    try:
+        connection.execute(stmt,body)
+        return jsonify({
+            'status':200,
+            'message':'New Customer data inserted Successfully',
+            'customer_data':body
+        })
+    
+    except IntegrityError as ie:
+        return jsonify({
+            'status': 400,
+            'message': "Duplicate input: program_code exists in database" if ie.orig.args[0] == 1062\
+                        else "Invalid input",
+            'data': {}
+        })
+
+    except:
+        return jsonify({
+            'status': 400,
+            'message': "Duplicate input: program_code exists in database",
+            'data': {}
+            }) 
+
+
+#Insert New Company Data
+@app.route('/api/insert_company',methods=['POST'])
+def insert_company():
+    body = request.get_json()
+    company = Table('Company',metadata_obj,autoload=True,autoload_with=engine)
+    stmt = insert(company)
+
+    try:
+       connection.execute(stmt,body)
+       return jsonify({
+        "status":200,
+        "message":"New Company details added successfully",
+        "company_details":body
+       })     
+    except:
+        return jsonify({
+            'status': 400,
+            'message': "Duplicate input: program_code exists in database",
+            'data': {}
+        })      
+
+#Insert new items
+@app.route('/api/insert_items',methods=['POST'])
+def insert_items():
+    body = request.get_json()
+    items= Table('Items',metadata_obj,autoload=True,autoload_with=engine)
+    stmt = insert(items)
+
+    try:
+       connection.execute(stmt,body)
+       return jsonify({
+        "status":200,
+        "message":"New Company details added successfully",
+        "company_details":body
+       })  
+         
+    except:
+        return jsonify({
+            'status': 400,
+            'message': "Duplicate input: program_code exists in database",
+            'data': {}
+        })    
+
+#Insert new Iventory
+@app.route('/api/insert_inventory',methods=['POST'])
+def insert_inventory():
+    body = request.get_json()
+    inventory= Table('Inventory',metadata_obj,autoload=True,autoload_with=engine)
+    stmt = insert(inventory)
+
+    try:
+       connection.execute(stmt,body)
+       return jsonify({
+        "status":200,
+        "message":"New invemtory details added successfully",
+        "company_details":body
+       })  
+         
+    except:
+        return jsonify({
+            'status': 400,
+            'message': "Duplicate input: program_code exists in database",
+            'data': {}
+        })  
 
 if __name__ == '__main__':
     create_table()
