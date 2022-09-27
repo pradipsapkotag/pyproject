@@ -327,10 +327,52 @@ def insertitem():
 
 
 
+## insert company
+@app.route('/insert/company', methods=['POST'])
+def insertcompany():
+    try:
+        params = request.get_json(force=True,silent=True)
+        company_id = params["company_id"]
+        company_name = params["company_name"]
+        company_address =params["company_address"]
+        company_phone= params['company_phone']
+        company_email = params["company_email"]
+        company = Company(company_id = company_id,company_name= company_name,company_address=company_address,company_phone=company_phone,company_email=company_email)
+        session.add(company)
+    
+        session.commit()
+        return jsonify({
+                'status': 'success',
+                'message': 'company insertion successful',
+                'data': {
+                    'recods_inserted': params
+                }
+            })
+    except IntegrityError as ie:
+        session.rollback()
+        return jsonify({
+            'status': "failed",
+            'message': "Duplicate input: company exists in database" if ie.orig.args[0] == 1062\
+                        else "Invalid input",
+            'data': {}
+        })
 
 
 
-
+@app.route('/item/availability/<int:item_id>', methods=['GET'])
+def itemavailability(item_id):
+    item= session.query(Item).filter_by(item_id = item_id).first()
+    if(item.item_quantity>=1):
+        return jsonify({
+                'status': 'success',
+                'message': 'item available',
+                'item_quantity': item.item_quantity
+            })
+    else:
+        return jsonify({
+                'status': 'failed',
+                'message': 'item out of stock',
+            })
 
 
 
