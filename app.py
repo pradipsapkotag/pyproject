@@ -102,7 +102,34 @@ def all_customers():
             'message':'data not found'
         })
 
+# Retrive all  items_data
+@app.route('/api/items',methods=['GET'])
+def all_items():
+    item = Table('Items',metadata_obj,autoload=True,autoload_with=engine)
+    stmt = select([item])
+    results = connection.execute(stmt).fetchall()
+    response_data = []
     
+    try:
+        for result in results:
+            data_dict = dict()
+            data_dict['item_id'] = result.item_id
+            data_dict['item_name'] = result.item_name
+            data_dict['item_brand'] = result.item_brand
+            data_dict['item_price'] = result.item_price
+            data_dict['item_quantity'] = result.item_quantity
+            response_data.append(data_dict)
+        
+        return jsonify({
+            'status':200,
+            'data':response_data
+        })
+
+    except:
+        return jsonify({
+            'status':400,
+            'message':'data not found'
+        })   
 
 if __name__ == '__main__':
     create_table()
