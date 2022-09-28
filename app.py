@@ -422,7 +422,7 @@ def total_item_price():
         }) 
 
 # Q.7 Calculate the average item_price from all total items available.
-@app.route('/api/average_price',methods=["GET"])
+@app.route('/api/total_price',methods=["GET"])
 def average_price():
     df = pd.read_sql("SELECT * FROM Items",connection)
     total_item_price = df
@@ -468,7 +468,7 @@ def check_null_values():
             'data': {}
         }) 
 
-#Q.9 Create a dataframe that returns inventory_id,inventory_name,item_name.
+#Q.9 Create a dataframe that returns inventory_name,item_quantity.
 @app.route('/api/return_req_data',methods=["GET"])
 def req_data():
     stmt = '''SELECT i.inventory_name,sum(it.item_quantity) AS item_quantity FROM
