@@ -1,3 +1,4 @@
+# import from pradip
 from crypt import methods
 from databasedata import password, username ,host, port
 
@@ -12,6 +13,10 @@ from sqlalchemy.types import Boolean, Date
 from random import randint,choice
 import pandas as pd
 from sqlalchemy.exc import IntegrityError
+
+
+
+
 
 
 app = Flask(__name__) 
@@ -514,6 +519,245 @@ def totalstock():
 
 
 
+
+
+
+
+
+
+
+
+
+
+#PANDAS IMPLEMENTATION
+
+#Q1 Show the all attributes of Company table.
+@app.route('/api/company_attributes',methods=['GET'])
+def company_attributes():
+    df = pd.read_sql("SELECT * FROM Customer",connection)
+    attributes= df.columns  
+    parsed = attributes.tolist()
+
+    try:
+       print(parsed) 
+       return jsonify({  
+        "status":200,
+        "message":"Data loaded successfully",
+        "columns":parsed
+        # "data":json.loads( df.to_json(orient='index'))
+       })  
+         
+    except:
+        return jsonify({
+            'status': 400,
+            'message': "Invalid url or resource not found",
+            'data': {}
+        }) 
+        
+        
+        
+
+#Q2. Show the item list where the item_price is at least 25000.
+@app.route('/api/items_info',methods=['GET'])
+def items_info():
+  stmt = '''SELECT * FROM Items '''
+  df = pd.read_sql(stmt,connection)  
+  itms = df[df.item_price >= 25000] 
+  try:
+       print(itms) 
+       return jsonify({  
+        "status":200,
+        "message":"Data loaded successfully",
+        "data":json.loads(itms.to_json(orient='index'))
+       })       
+  except:
+        return jsonify({
+            'status': 400,
+            'message': "Invalid url or resource not found",
+            'data': {}
+        }) 
+        
+        
+        
+
+
+# Q.3 How many items does the Items dataframe contains?
+@app.route('/api/items_quantity',methods=['GET'])
+def total_items_quantity():
+    df = pd.read_sql("SELECT * FROM Items",connection)
+    item_quantity=df.item_quantity.sum()
+    try:
+       print(item_quantity) 
+       return jsonify({  
+        "status":200,
+        "message":"Data loaded successfully",
+        "data":"Total items in Item table: "+str(item_quantity)
+       })  
+         
+    except:
+        return jsonify({
+            'status': 400,
+            'message': "Invalid url or resource not found",
+            'data': {}
+        })  
+        
+        
+
+
+# Q.4 Which item does have highest quantity available in stock?
+@app.route('/api/max_quantity',methods=['GET'])
+def max_item_quantity():
+    df = pd.read_sql("SELECT * FROM Items",connection)
+    # item_quantity=df.item_quantity.max()
+    df=df.sort_values('item_quantity',ascending=False)
+    max_item_quantity=df.head(1)
+    try:
+       print(max_item_quantity) 
+       return jsonify({  
+        "status":200,
+        "message":"Data loaded successfully",
+        "max_quantity_item":json.loads(max_item_quantity.to_json(orient='index'))
+       })  
+         
+    except:
+        return jsonify({
+            'status': 400,
+            'message': "Invalid url or resource not found",
+            'data': {}
+        })  
+      
+# Q.5 Which is the most 5 expensive amongst all the items?
+@app.route('/api/top5_expensive',methods=['GET'])
+def top5_item_quantity():
+    df = pd.read_sql("SELECT * FROM Items",connection)
+    # item_quantity=df.item_quantity.max()
+    df=df.sort_values('item_price',ascending=False)
+    top5_expensive=df.head(5)
+    try:
+       print(top5_expensive) 
+       return jsonify({  
+        "status":200,
+        "message":"Data loaded successfully",
+        "top5_expensive_item":json.loads(top5_expensive.to_json(orient='index'))
+       })  
+         
+    except:
+        return jsonify({
+            'status': 400,
+            'message': "Invalid url or resource not found",
+            'data': {}
+        }) 
+        
+        
+        
+        
+
+# Q.6 Create a dataframe having total price of item according to its quantity available?
+@app.route('/api/total_price',methods=["GET"])
+def total_item_price():
+    df = pd.read_sql("SELECT * FROM Items",connection)
+    total_item_price = df
+    # item_quantity=df.item_quantity.max()
+    total_item_price['Total Price'] = df['item_price'] * df['item_quantity']
+    try:
+       print(total_item_price) 
+       return jsonify({  
+        "status":200,
+        "message":"Data loaded successfully",
+        "data":json.loads(total_item_price.to_json(orient='index'))
+       })  
+         
+    except:
+        return jsonify({
+            'status': 400,
+            'message': "Invalid url or resource not found",
+            'data': {}
+        }) 
+
+
+
+
+
+# Q.7 Calculate the average item_price from all total items available.
+@app.route('/api/average_price',methods=["GET"])
+def average_price():
+    df = pd.read_sql("SELECT * FROM Items",connection)
+    total_item_price = df
+    # item_quantity=df.item_quantity.max()
+    total_item_price['Total Price'] = df['item_price'] * df['item_quantity']
+    avg=total_item_price['Total Price'].mean()
+    try:
+       print(avg) 
+       return jsonify({  
+        "status":200,
+        "message":"The average price is:"+ str(avg),
+       })  
+         
+    except:
+        return jsonify({
+            'status': 400,
+            'message': "Invalid url or resource not found",
+            'data': {}
+        })
+
+
+
+
+
+
+#Q.8 Check whether if price have null values or not.
+@app.route('/api/check_null',methods=["GET"])
+def check_null_values():
+    df = pd.read_sql("SELECT * FROM Items",connection)
+    df['item_price'].isna()
+    total = df.item_price.count()
+    non_null_count = df['item_price'].isna().count()
+    try:
+           print(df['item_price'].isna())
+           return jsonify({  
+            "status":200,
+            "price":list(df['item_price'].isna()),
+            "price_column_count":int(total),
+            "non_null_price":int(non_null_count)
+           })  
+         
+    except:
+        return jsonify({
+            'status': 400,
+            'message': "Invalid url or resource not found",
+            'data': {}
+        }) 
+
+
+
+#Q.9 Create a dataframe that returns inventory_id,inventory_name,item_name.
+@app.route('/api/return_req_data',methods=["GET"])
+def req_data():
+    stmt = '''SELECT i.inventory_name,sum(it.item_quantity) AS item_quantity FROM
+              Inventory i 
+              LEFT JOIN Items it
+              ON i.item_id = it.item_id
+              GROUP BY inventory_name
+              '''
+    df = pd.read_sql(stmt,connection)   
+    try:
+       print(df) 
+       return jsonify({  
+        "status":200,
+        "message":"Data loaded successfully",
+        "data":json.loads(df.to_json(orient='index'))
+       })       
+    except:
+        return jsonify({
+            'status': 400,
+            'message': "Invalid url or resource not found",
+            'data': {}
+        }) 
+        
+        
+        
+        
+        
 if __name__ == '__main__':
     # create_table()
     # add_new_person(3)
