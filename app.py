@@ -1,3 +1,4 @@
+from itertools import count
 from multiprocessing import connection
 from sqlite3 import IntegrityError
 from sqlalchemy.orm import sessionmaker,relationship
@@ -7,8 +8,6 @@ from sqlalchemy.ext.declarative import declarative_base
 import json
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Date
 import pandas as pd
-
-
 
 '''FOR MYSQL'''
 engine = create_engine('mysql+mysqldb://root:mounteverest8848@localhost:3306/Inventory_Management')
@@ -422,17 +421,44 @@ def total_item_price():
             'data': {}
         }) 
 
-#Q.7 Return a dataframe that has null values.
+# Q.7 Calculate the average item_price from all total items available.
+@app.route('/api/average_price',methods=["GET"])
+def average_price():
+    df = pd.read_sql("SELECT * FROM Items",connection)
+    total_item_price = df
+    # item_quantity=df.item_quantity.max()
+    total_item_price['Total Price'] = df['item_price'] * df['item_quantity']
+    avg=total_item_price['Total Price'].mean()
+    try:
+       print(avg) 
+       return jsonify({  
+        "status":200,
+        "message":"The average price is:"+ str(avg),
+       })  
+         
+    except:
+        return jsonify({
+            'status': 400,
+            'message': "Invalid url or resource not found",
+            'data': {}
+        })
+
+
+
+#Q.8 Check whether if price have null values or not.
 @app.route('/api/check_null',methods=["GET"])
 def check_null_values():
     df = pd.read_sql("SELECT * FROM Items",connection)
     df['item_price'].isna()
+    total = df.item_price.count()
+    non_null_count = df['item_price'].isna().count()
     try:
-           print(df['item_price'].isna()) 
+           print(df['item_price'].isna())
            return jsonify({  
             "status":200,
-            "message":"Items has No Null Columns",
-            "data":list(df['item_price'].isna())
+            "price":list(df['item_price'].isna()),
+            "price_column_count":int(total),
+            "non_null_price":int(non_null_count)
            })  
          
     except:
@@ -442,10 +468,10 @@ def check_null_values():
             'data': {}
         }) 
 
-#Q.8 Create a dataframe that returns inventory_id,inventory_name,item_name.
+#Q.9 Create a dataframe that returns inventory_id,inventory_name,item_name.
 @app.route('/api/return_req_data',methods=["GET"])
 def req_data():
-    stmt = '''SELECT i.inventory_id,i.inventory_name,sum(it.item_quantity) AS item_quantity FROM
+    stmt = '''SELECT i.inventory_name,sum(it.item_quantity) AS item_quantity FROM
               Inventory i 
               LEFT JOIN Items it
               ON i.item_id = it.item_id
@@ -465,8 +491,6 @@ def req_data():
             'message': "Invalid url or resource not found",
             'data': {}
         }) 
-
-
 
 if __name__ == '__main__':
     create_table()
