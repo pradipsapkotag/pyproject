@@ -410,7 +410,7 @@ def total_item_price():
        print(total_item_price) 
        return jsonify({  
         "status":200,
-        "message":"Data loaded successfully",
+        "message":"",
         "data":json.loads(total_item_price.to_json(orient='index'))
        })  
          
