@@ -422,7 +422,7 @@ def total_item_price():
         }) 
 
 # Q.7 Calculate the average item_price from all total items available.
-@app.route('/api/total_price',methods=["GET"])
+@app.route('/api/avg_price',methods=["GET"])
 def average_price():
     df = pd.read_sql("SELECT * FROM Items",connection)
     total_item_price = df
